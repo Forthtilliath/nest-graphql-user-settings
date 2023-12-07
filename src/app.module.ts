@@ -23,7 +23,10 @@ import { UsersModule } from './users/users.module';
       port: parseInt(process.env.DB_PORT, 10),
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE,
+      database:
+        process.env.NODE_ENV === 'TEST'
+          ? process.env.DB_DATABASE_TEST
+          : process.env.DB_DATABASE,
       entities: [User, UserSetting],
       synchronize: true,
       logging: false,
