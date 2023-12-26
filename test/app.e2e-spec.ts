@@ -5,6 +5,9 @@ import { AppModule } from '../src/app.module';
 import { DataSource } from 'typeorm';
 import { print } from 'graphql';
 import { createUserMutation, getUsersQuery } from '../src/utils/queries';
+import { UsersService } from '../src/users/users.service';
+import { UsersController } from '../src/users/users.controller';
+import { Users } from '../src/graphql/models/User';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -15,8 +18,6 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    await app.get(DataSource).synchronize(true);
-    await app.init();
   });
 
   afterAll(async () => {
@@ -25,7 +26,12 @@ describe('AppController (e2e)', () => {
     await app.close();
   });
 
-  describe('users', () => {
+  describe('users graphql', () => {
+    beforeAll(async () => {
+      await app.get(DataSource).synchronize(true);
+      await app.init();
+    });
+
     it('should query getUsers and return 0 users', () => {
       return request(app.getHttpServer())
         .post('/graphql')
@@ -63,6 +69,119 @@ describe('AppController (e2e)', () => {
             },
           ]);
           expect(res.body.data.getUsers).toHaveLength(1);
+        });
+    });
+  });
+
+  describe('user api with spyon', () => {
+    let usersController: UsersController;
+    let usersService: UsersService;
+
+    beforeAll(async () => {
+      await app.get(DataSource).synchronize(true);
+      await app.init();
+    });
+
+    beforeEach(() => {
+      usersService = new UsersService(app.get(DataSource).getRepository(Users));
+      usersController = new UsersController(usersService);
+    });
+
+    it('should query getUsers and return 0 users', async () => {
+      const result: Promise<Users[]> = new Promise((r) => r([]));
+      jest.spyOn(usersService, 'getUsers').mockImplementation(() => result);
+
+      expect(usersController.getUsers()).toEqual(result);
+    });
+  });
+
+  describe('users api with request', () => {
+    beforeAll(async () => {
+      await app.get(DataSource).synchronize(true);
+      await app.init();
+    });
+
+    it('should query getUsers and return 0 users using GET /api/users', () => {
+      return request(app.getHttpServer())
+        .get('/api/users')
+        .expect(200)
+        .expect([]);
+    });
+
+    it('shoud create a user using POST /api/users', () => {
+      return request(app.getHttpServer())
+        .post('/api/users')
+        .set('Accept', 'application/json')
+        .send({
+          username: 'forthtilliath',
+          displayName: 'Forth',
+        })
+        .expect(201)
+        .expect({
+          id: 1,
+          username: 'forthtilliath',
+          displayName: 'Forth',
+        });
+    });
+
+    it('should query getUsers and return 1 user using GET /api/users', () => {
+      return request(app.getHttpServer())
+        .get('/api/users')
+        .expect(200)
+        .expect([
+          {
+            id: 1,
+            username: 'forthtilliath',
+            displayName: 'Forth',
+            settings: null,
+          },
+        ]);
+    });
+
+    it('shoud create a user without displayName using POST /api/users', () => {
+      return request(app.getHttpServer())
+        .post('/api/users')
+        .set('Accept', 'application/json')
+        .send({
+          username: 'yakio',
+        })
+        .expect(201)
+        .expect({
+          id: 2,
+          username: 'yakio',
+          displayName: null,
+        });
+    });
+
+    it('should query getUsers and return 2 users using GET /api/users', () => {
+      return request(app.getHttpServer())
+        .get('/api/users')
+        .expect(200)
+        .expect([
+          {
+            id: 1,
+            username: 'forthtilliath',
+            displayName: 'Forth',
+            settings: null,
+          },
+          {
+            id: 2,
+            username: 'yakio',
+            displayName: 'yakio', // interceptor
+            settings: null,
+          },
+        ]);
+    });
+
+    it('should query getUsers and return 2 users using GET /api/users', () => {
+      return request(app.getHttpServer())
+        .get('/api/users/2')
+        .expect(200)
+        .expect({
+          id: 2,
+          username: 'yakio',
+          displayName: null, // no interceptor here
+          settings: null,
         });
     });
   });

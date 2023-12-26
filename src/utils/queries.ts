@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { DocumentNode } from 'graphql';
 import gql from 'graphql-tag';
 
 export const createUserMutation = gql`

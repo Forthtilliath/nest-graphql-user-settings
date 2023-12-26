@@ -3,7 +3,7 @@ import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity({ name: 'user_settings' })
 @ObjectType()
-export class UserSetting {
+export class UserSettings {
   @PrimaryColumn()
   @Field(() => Int)
   userId: number;

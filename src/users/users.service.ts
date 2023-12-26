@@ -1,27 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../graphql/models/User';
+import { Users } from '../graphql/models/User';
 import { CreateUserInput } from '../graphql/utils/CreateUserInput';
 
 @Injectable()
-export class UserService {
+export class UsersService {
   constructor(
-    @InjectRepository(User) private usersRepository: Repository<User>,
+    @InjectRepository(Users) private usersRepository: Repository<Users>,
   ) {}
 
-  getUsers(): Promise<User[]> {
+  getUsers(): Promise<Users[]> {
     return this.usersRepository.find({ relations: ['settings'] });
   }
 
-  getUserById(id: number): Promise<User> {
+  getUserById(id: number): Promise<Users> {
     return this.usersRepository.findOne({
       where: { id },
       relations: ['settings'],
     });
   }
 
-  createUser(createUserData: CreateUserInput): Promise<User> {
+  createUser(createUserData: CreateUserInput): Promise<Users> {
     const newUser = this.usersRepository.create(createUserData);
     return this.usersRepository.save(newUser);
   }

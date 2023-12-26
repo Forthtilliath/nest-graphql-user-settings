@@ -3,8 +3,8 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { User } from './graphql/models/User';
-import { UserSetting } from './graphql/models/UserSetting';
+import { Users } from './graphql/models/User';
+import { UserSettings } from './graphql/models/UserSetting';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -27,7 +27,7 @@ import { UsersModule } from './users/users.module';
         process.env.NODE_ENV === 'TEST'
           ? process.env.DB_DATABASE_TEST
           : process.env.DB_DATABASE,
-      entities: [User, UserSetting],
+      entities: [Users, UserSettings],
       synchronize: true,
       logging: false,
     }),

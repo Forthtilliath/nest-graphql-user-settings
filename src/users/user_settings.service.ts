@@ -1,26 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../graphql/models/User';
-import { UserSetting } from '../graphql/models/UserSetting';
-import { CreateUserSettingInput } from '../graphql/utils/CreateUserSettingInput';
+import { Users } from '../graphql/models/User';
+import { UserSettings } from '../graphql/models/UserSetting';
+import { CreateUserSettingsInput } from '../graphql/utils/CreateUserSettingInput';
 
 @Injectable()
-export class UserSettingService {
+export class UserSettingsService {
   constructor(
-    @InjectRepository(UserSetting)
-    private userSettingsRepository: Repository<UserSetting>,
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    @InjectRepository(UserSettings)
+    private userSettingsRepository: Repository<UserSettings>,
+    @InjectRepository(Users)
+    private userRepository: Repository<Users>,
   ) {}
 
-  getUserSettingById(userId: number): Promise<UserSetting> {
+  getUserSettingById(userId: number): Promise<UserSettings> {
     return this.userSettingsRepository.findOneBy({ userId });
   }
 
   async createUserSetting(
-    createUserSettingData: CreateUserSettingInput,
-  ): Promise<UserSetting> {
+    createUserSettingData: CreateUserSettingsInput,
+  ): Promise<UserSettings> {
     const userFound = await this.userRepository.findOneBy({
       id: createUserSettingData.userId,
     });
